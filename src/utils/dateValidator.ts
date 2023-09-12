@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import { ValidationError } from "./errorValidator";
+import logger from "./logger";
 
 // Define constants for date formats
 export const DATE_FORMAT_ISO = 'ISO';
@@ -25,17 +26,23 @@ type DateFormat = 'ISO' | 'custom';
 export function validateAndParseDate(date: string, format: DateFormat): DateTime {
   let parsedDate: DateTime;
 
-  if (format === DATE_FORMAT_ISO) {
-    parsedDate = DateTime.fromISO(date).toUTC();
-  } else if (format === DATE_FORMAT_CUSTOM) {
-    parsedDate = DateTime.fromFormat(date, CUSTOM_DATE_FORMAT_STRING);
-  } else {
-    throw new ValidationError(`Invalid date format type specified. Supported formats are '${DATE_FORMAT_ISO}' and '${DATE_FORMAT_CUSTOM}'`);
+  try {
+    if (format === DATE_FORMAT_ISO) {
+      parsedDate = DateTime.fromISO(date).toUTC();
+    } else if (format === DATE_FORMAT_CUSTOM) {
+      parsedDate = DateTime.fromFormat(date, CUSTOM_DATE_FORMAT_STRING);
+    } else {
+      throw new ValidationError(`Invalid date format type specified. Supported formats are '${DATE_FORMAT_ISO}' and '${DATE_FORMAT_CUSTOM}'`);
+    }
+
+    if (!parsedDate.isValid) {
+      throw new ValidationError(`Invalid date format for '${date}' using format '${format}'`);
+    }
+  } catch (error) {
+    logger.error(`Error in validateAndParseDate: ${error}`);
+    throw error;
   }
 
-  if (!parsedDate.isValid) {
-    throw new ValidationError(`Invalid date format for '${date}' using format '${format}'`);
-  }
 
   return parsedDate;
 }
@@ -44,16 +51,21 @@ export function validateAndParseDate(date: string, format: DateFormat): DateTime
 export function isValidDate(date: string, format: DateFormat): boolean {
   let parsedDate: DateTime;
 
-  if (format === DATE_FORMAT_ISO) {
-    parsedDate = DateTime.fromISO(date).toUTC();
-  } else if (format === DATE_FORMAT_CUSTOM) {
-    parsedDate = DateTime.fromFormat(date, CUSTOM_DATE_FORMAT_STRING);
-  } else {
-    throw new ValidationError(`Unsupported date format: ${format}`); // Throw custom error for unsupported format
-  }
+  try {
+    if (format === DATE_FORMAT_ISO) {
+      parsedDate = DateTime.fromISO(date).toUTC();
+    } else if (format === DATE_FORMAT_CUSTOM) {
+      parsedDate = DateTime.fromFormat(date, CUSTOM_DATE_FORMAT_STRING);
+    } else {
+      throw new ValidationError(`Unsupported date format: ${format}`); // Throw custom error for unsupported format
+    }
 
-  if (!parsedDate.isValid) {
-    throw new ValidationError(`Invalid date format for '${date}' using format '${format}'`); // Throw custom error for invalid date
+    if (!parsedDate.isValid) {
+      throw new ValidationError(`Invalid date format for '${date}' using format '${format}'`); // Throw custom error for invalid date
+    }
+  } catch (error) {
+    logger.error(`Error in isValidDate: ${error}`);
+    throw error;
   }
 
   return true; // Date is valid

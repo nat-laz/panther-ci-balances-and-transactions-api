@@ -5,6 +5,7 @@ import { DATE_FORMAT_ISO } from "../../utils/dateValidator";
 import { validateTransactionArray } from "../../utils/transactionValidators";
 import { formatDate } from "../../utils/dateUtils";
 import { ValidationError } from "../../utils/errorValidator";
+import logger from "../../utils/logger";
 
 const STATUS_CANCELLED = "CANCELLED";
 
@@ -12,36 +13,38 @@ export function buildDailyBalances(
     balance: Balance,
     transactions: Transaction[]
 ): Record<string, number> {
-    // Validate the balance object
-    // Validate the balance object
-    if (!balance || typeof balance.amount !== 'number' || !balance.date) {
-        throw new ValidationError('Invalid balance object');
-    }
-
-    // Validate the date in the balance object
-    const initialDate = validateAndParseDate(balance.date, DATE_FORMAT_ISO);
-
-    // Validate the transactions array
-    validateTransactionArray(transactions);
-
-    // Initialize variables
-    let lastBalanceAmount = balance.amount;
-    let lastDate = formatDate(initialDate);
-
-    // Initialize the dailyBalances object
-    const dailyBalances: Record<string, number> = {
-        [lastDate]: lastBalanceAmount,
-    };
-
-    for (const transaction of transactions) {
-        const transactionDate = validateAndParseDate(transaction.date, DATE_FORMAT_ISO);
-
-        // Update daily balances if the transaction is not cancelled
-        if (transaction.status !== STATUS_CANCELLED) {
-            lastBalanceAmount += transaction.amount;
-            dailyBalances[formatDate(transactionDate)] = lastBalanceAmount;
+    try {
+        // Validate the balance object
+        if (!balance || typeof balance.amount !== 'number' || !balance.date) {
+            throw new ValidationError('Invalid balance object');
         }
-    }
 
-    return dailyBalances;
+        const initialDate = validateAndParseDate(balance.date, DATE_FORMAT_ISO);
+
+        // Validate the transactions array
+        validateTransactionArray(transactions);
+
+        let lastBalanceAmount = balance.amount;
+        let lastDate = formatDate(initialDate);
+
+        const dailyBalances: Record<string, number> = {
+            [lastDate]: lastBalanceAmount,
+        };
+
+        for (const transaction of transactions) {
+            const transactionDate = validateAndParseDate(transaction.date, DATE_FORMAT_ISO);
+            
+            if (transaction.status !== STATUS_CANCELLED) {
+                lastBalanceAmount += transaction.amount;
+                dailyBalances[formatDate(transactionDate)] = lastBalanceAmount;
+            }
+        }
+
+        logger.info('Successfully built daily balances.');
+        return dailyBalances;
+
+    } catch (error) {
+        logger.error(`Error in buildDailyBalances: ${error}`);
+        throw error;
+    }
 }

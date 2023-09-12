@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import { ValidationError } from "./errorValidator";
 
 // Define constants for date formats
 export const DATE_FORMAT_ISO = 'ISO';
@@ -19,6 +20,7 @@ type DateFormat = 'ISO' | 'custom';
  * @param format - The expected format of the date string ('ISO' or 'custom')
  * @returns The parsed DateTime object in UTC
  * @throws Will throw an error if the date is invalid or the format is unsupported
+ * 
  */
 export function validateAndParseDate(date: string, format: DateFormat): DateTime {
   let parsedDate: DateTime;
@@ -28,12 +30,31 @@ export function validateAndParseDate(date: string, format: DateFormat): DateTime
   } else if (format === DATE_FORMAT_CUSTOM) {
     parsedDate = DateTime.fromFormat(date, CUSTOM_DATE_FORMAT_STRING);
   } else {
-    throw new Error(`Invalid date format type specified. Supported formats are '${DATE_FORMAT_ISO}' and '${DATE_FORMAT_CUSTOM}'`);
+    throw new ValidationError(`Invalid date format type specified. Supported formats are '${DATE_FORMAT_ISO}' and '${DATE_FORMAT_CUSTOM}'`);
   }
 
   if (!parsedDate.isValid) {
-    throw new Error(`Invalid date format for '${date}' using format '${format}'`);
+    throw new ValidationError(`Invalid date format for '${date}' using format '${format}'`);
   }
 
   return parsedDate;
+}
+
+
+export function isValidDate(date: string, format: DateFormat): boolean {
+  let parsedDate: DateTime;
+
+  if (format === DATE_FORMAT_ISO) {
+    parsedDate = DateTime.fromISO(date).toUTC();
+  } else if (format === DATE_FORMAT_CUSTOM) {
+    parsedDate = DateTime.fromFormat(date, CUSTOM_DATE_FORMAT_STRING);
+  } else {
+    throw new ValidationError(`Unsupported date format: ${format}`); // Throw custom error for unsupported format
+  }
+
+  if (!parsedDate.isValid) {
+    throw new ValidationError(`Invalid date format for '${date}' using format '${format}'`); // Throw custom error for invalid date
+  }
+
+  return true; // Date is valid
 }

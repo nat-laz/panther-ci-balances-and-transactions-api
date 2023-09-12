@@ -1,10 +1,10 @@
-import { formatDate } from "./dateUtils";
 import {validateAndParseDate} from './dateValidator'
+import { ValidationError } from './errorValidator';
 import { isValidStatus } from "./transactionStatus";
 
 export function validateTransactionArray(transactions: any): void {
     if (!Array.isArray(transactions)) {
-      throw new Error("Input must be an array of transactions");
+      throw new ValidationError("Input must be an array of transactions");
     }
   
     for (const transaction of transactions) {
@@ -14,7 +14,7 @@ export function validateTransactionArray(transactions: any): void {
         !transaction.date ||
         !transaction.status
       ) {
-        throw new Error("Invalid transaction object in the array");
+        throw new ValidationError("Invalid transaction object in the array");
       }
   
       validateAndParseDate(transaction.date, 'ISO');

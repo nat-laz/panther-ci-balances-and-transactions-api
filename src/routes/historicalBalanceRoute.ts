@@ -1,5 +1,5 @@
 import express from "express";
-import { getHistoricalBalance } from "../controllers/historicalBalanceController";
+import { getHistoricalBalance } from "../controllers/gethistoricalBalanceController";
 
 const router = express.Router();
 

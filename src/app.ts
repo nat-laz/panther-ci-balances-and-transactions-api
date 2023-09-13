@@ -3,7 +3,7 @@ import express, { Request, Response, NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "../swagger.json";
 import historicalBalanceRoute from "./routes/historicalBalanceRoute";
-import { ValidationError } from "./utils/errorValidator";
+import { ValidationError } from "./utils/validationErrors";
 import logger from './utils/logger'
 
 const app = express();

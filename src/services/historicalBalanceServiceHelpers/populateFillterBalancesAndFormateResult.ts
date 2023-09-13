@@ -1,10 +1,10 @@
-import { ValidationError } from "../../utils/errorValidator";
+import { ValidationError } from "../../utils/validationErrors";
 import { validateAndParseDate } from "../../utils/dateValidator";
 import { formatDate } from "../../utils/dateUtils";
-import { DATE_FORMAT_ISO, DATE_FORMAT_CUSTOM } from "../../utils/dateValidator";
 import { validateDailyBalances } from "../../utils/dailyBalanceValidator";
 import { HistoricalBalance } from "../../models/historicalBalance";
 import logger from "../../utils/logger";
+import { DateFormat } from "../../utils/dateValidator";
 
 const CURRENCY_EUR = "EUR";
 
@@ -15,6 +15,7 @@ export function populateMissingBalances(
     fromDate: string,
     toDate: string
 ): void {
+
     try {
         // Validate dailyBalances
         if (typeof dailyBalances !== "object" || dailyBalances === null) {
@@ -22,8 +23,9 @@ export function populateMissingBalances(
         }
 
         // Validate and parse fromDate and toDate
-        const startDate = validateAndParseDate(fromDate, DATE_FORMAT_ISO);
-        const endDate = validateAndParseDate(toDate, DATE_FORMAT_ISO);
+        const startDate = validateAndParseDate(fromDate, DateFormat.DATE_FORMAT_ISO);
+        const endDate = validateAndParseDate(toDate, DateFormat.DATE_FORMAT_ISO);
+
 
         // Check if startDate is less than or equal to endDate
         if (startDate > endDate) {
@@ -40,7 +42,7 @@ export function populateMissingBalances(
             dailyBalances[formattedDate] =
                 dailyBalances[formattedDate] ?? currentBalance;
         }
-
+        //  console.log("dailyBalance VAR from populateMissingBalances", dailyBalances)
         logger.info('Successfully populate missing balances.');
 
     } catch (error) {
@@ -55,14 +57,16 @@ export function filterBalancesWithinDateRange(
     fromDate: string,
     toDate: string
 ): Record<string, number> {
+
     try {
 
         // Validate dailyBalances
         validateDailyBalances(dailyBalances)
 
         // Validate and parse fromDate and toDate using the utility function
-        const startDateMillis = validateAndParseDate(fromDate, DATE_FORMAT_ISO).toUTC().toMillis();
-        const endDateMillis = validateAndParseDate(toDate, DATE_FORMAT_ISO).toUTC().toMillis();
+        const startDateMillis = validateAndParseDate(fromDate, DateFormat.DATE_FORMAT_ISO).toUTC().toMillis();
+        const endDateMillis = validateAndParseDate(toDate, DateFormat.DATE_FORMAT_ISO).toUTC().toMillis();
+
 
         if (startDateMillis > endDateMillis) {
             throw new ValidationError("fromDate should be less than or equal to toDate");
@@ -73,13 +77,14 @@ export function filterBalancesWithinDateRange(
 
         // Validate each date in dailyBalances and filter them
         for (const [date, balance] of Object.entries(dailyBalances)) {
-            const currentBalanceDateMillis = validateAndParseDate(date, DATE_FORMAT_CUSTOM).toUTC().toMillis();  // Validate each date
+
+            const currentBalanceDateMillis = validateAndParseDate(date, DateFormat.DATE_FORMAT_CUSTOM).toUTC().toMillis();  // Validate each date
             if (currentBalanceDateMillis >= startDateMillis && currentBalanceDateMillis <= endDateMillis) {
                 filteredBalances[date] = balance;
             }
         }
 
-        logger.info(`Successfully filtering balances within ${fromDate} - ${toDate} date range.`);
+        logger.info(`Successfully filtered balances within ${fromDate} - ${toDate} date range.`);
         return filteredBalances;
 
     } catch (error) {
@@ -104,6 +109,7 @@ export function formatResult(
             amount: filteredBalances[date],
             currency: CURRENCY_EUR,
         }));
+
     } catch (error) {
         logger.error(`Error in formatResult: ${error}`);
         throw error;

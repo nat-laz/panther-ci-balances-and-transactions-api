@@ -1,4 +1,4 @@
-import { ValidationError } from "./errorValidator";
+import { ValidationError } from "./validationErrors";
 
 const INVALID_DAILY_BALANCES_ERROR = "Invalid dailyBalances object";
 

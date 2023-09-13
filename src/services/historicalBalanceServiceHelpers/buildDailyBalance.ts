@@ -1,11 +1,11 @@
 import { Balance } from "../../models/balance";
 import { Transaction } from "../../models/transaction";
 import { validateAndParseDate } from "../../utils/dateValidator";
-import { DATE_FORMAT_ISO } from "../../utils/dateValidator";
 import { validateTransactionArray } from "../../utils/transactionValidators";
 import { formatDate } from "../../utils/dateUtils";
-import { ValidationError } from "../../utils/errorValidator";
+import { ValidationError } from "../../utils/validationErrors";
 import logger from "../../utils/logger";
+import { DateFormat } from "../../utils/dateValidator";
 
 const STATUS_CANCELLED = "CANCELLED";
 
@@ -19,7 +19,7 @@ export function buildDailyBalances(
             throw new ValidationError('Invalid balance object');
         }
 
-        const initialDate = validateAndParseDate(balance.date, DATE_FORMAT_ISO);
+        const initialDate = validateAndParseDate(balance.date, DateFormat.DATE_FORMAT_ISO);
 
         // Validate the transactions array
         validateTransactionArray(transactions);
@@ -32,8 +32,8 @@ export function buildDailyBalances(
         };
 
         for (const transaction of transactions) {
-            const transactionDate = validateAndParseDate(transaction.date, DATE_FORMAT_ISO);
-            
+            const transactionDate = validateAndParseDate(transaction.date, DateFormat.DATE_FORMAT_ISO);
+
             if (transaction.status !== STATUS_CANCELLED) {
                 lastBalanceAmount += transaction.amount;
                 dailyBalances[formatDate(transactionDate)] = lastBalanceAmount;

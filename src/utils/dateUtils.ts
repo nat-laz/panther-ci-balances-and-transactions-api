@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 
+// Formats a given date into a "dd/MM/yyyy" string.
 export function formatDate(date: DateTime | string): string {
   if (typeof date === "string") {
     date = DateTime.fromISO(date).toUTC();
@@ -7,14 +8,9 @@ export function formatDate(date: DateTime | string): string {
   return date.toFormat("dd/MM/yyyy");
 }
 
-// Helper function to parse dates
-export function parseDate(dateStr: string): Date {
-  const [day, month, year] = dateStr.split("/").map(Number);
-  return new Date(year, month - 1, day); // Month is zero-based in JavaScript Date
+// Compares two Luxon DateTime objects.
+export function compareDates(date1: DateTime, date2: DateTime): number {
+  if (date1 < date2) return -1;
+  if (date1 > date2) return 1;
+  return 0;
 }
-
-// Comparator function for sorting
-export function compareDates(a: Date, b: Date): number {
-  return a.getTime() - b.getTime();
-}
-

@@ -1,8 +1,9 @@
-import { getBalances, getTransactions } from "../api/apiService";
+import { getTransactions } from "../apiServices/getTransactions";
+import { getBalances } from "../apiServices/getBalances";
 import { HistoricalBalance } from "../models/historicalBalance";
-import { populateMissingBalances, filterBalancesWithinDateRange, formatResult } from "./historicalBalanceHelpers/populate_fillter_format";
-import { sortTransactionsByDateDescending } from "./historicalBalanceHelpers/sortTransactionsDesc";
-import { buildDailyBalances } from "./historicalBalanceHelpers/buildDailyBalance";
+import { populateMissingBalances, filterBalancesWithinDateRange, formatResult } from "./historicalBalanceServiceHelpers/populateFillterBalancesAndFormateResult";
+import { sortTransactionsByDateDescending } from "./historicalBalanceServiceHelpers/sortTransactionsDesc";
+import { buildDailyBalances } from "./historicalBalanceServiceHelpers/buildDailyBalance";
 import logger from "../utils/logger";
 
 export async function historicalBalanceService(fromDate: string, toDate: string): Promise<HistoricalBalance[]> {
@@ -29,7 +30,7 @@ export async function historicalBalanceService(fromDate: string, toDate: string)
 
     return formatResult(filteredBalances);
   } catch (error) {
-    logger.error("Error in historicalBalanceService:", error); // Log error
-    throw error; // propagate the error up to the calling function
+    logger.error("Error in historicalBalanceService:", error);
+    throw error;
   }
 }

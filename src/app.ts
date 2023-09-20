@@ -21,7 +21,7 @@ app.use("/api", historicalBalanceRoute);
 logger.info('Starting server...');
 
 // General error-handling middleware
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response) => {
     logger.error(err.message);  // Log the error details using Winston
 
     if (err instanceof ValidationError) {

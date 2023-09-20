@@ -1,21 +1,25 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import "dotenv/config";
 import logger from "../utils/logger";
-
-const API_KEY = process.env.X_API_KEY;
-const API_URL: string = process.env.URL!;
+import { API_KEY, API_URL } from "./getBalances";
 
 export async function getTransactions() {
 
-  try {
-    const response = await axios.get(`${API_URL}/transactions`, {
-      headers: { "x-api-key": API_KEY },
-    });
+    try {
+        const response = await axios.get(`${API_URL}/transactions`, {
+          headers: { "x-api-key": API_KEY },
+        });
 
-    return response.data.transactions;
-  } catch (error) {
-    logger.error(`Error while fetching transactions: ${error}`);
-    throw error; // Rethrow the error for handling at a higher level
-  }
+        return response.data.transactions;
 
+    } catch (error) {
+        const axiosError = error as AxiosError;
+        logger.error(`Error while fetching balances: ${axiosError}`);
+
+        if (axiosError.response && axiosError.response.data) {
+          throw axiosError.response.data;
+        } else {
+          throw axiosError;
+        }
+    }
 }

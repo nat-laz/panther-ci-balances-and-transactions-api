@@ -1,9 +1,9 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import "dotenv/config";
 import logger from "../utils/logger";
 
-const API_KEY = process.env.X_API_KEY;
-const API_URL: string = process.env.URL!;
+export const API_KEY = process.env.X_API_KEY;
+export const API_URL: string = process.env.URL!;
 
 export async function getBalances() {
 
@@ -14,8 +14,13 @@ export async function getBalances() {
 
         return response.data;
     } catch (error) {
-        logger.error(`Error while fetching balances: ${error}`);
-        throw error; // Rethrow the error for handling at a higher level
-    }
+        const axiosError = error as AxiosError;
+        logger.error(`Error while fetching balances: ${axiosError}`);
 
+        if (axiosError.response && axiosError.response.data) {
+            throw axiosError.response.data;
+        } else {
+            throw axiosError;
+        }
+    }
 }

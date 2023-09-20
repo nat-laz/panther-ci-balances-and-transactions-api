@@ -18,9 +18,7 @@ export function populateMissingBalances(
 
     try {
         // Validate dailyBalances
-        if (typeof dailyBalances !== "object" || dailyBalances === null) {
-            throw new ValidationError('Invalid balance object');
-        }
+        validateDailyBalances(dailyBalances)
 
         // Validate and parse fromDate and toDate
         const startDate = validateAndParseDate(fromDate, DateFormat.DATE_FORMAT_ISO);
@@ -42,7 +40,7 @@ export function populateMissingBalances(
             dailyBalances[formattedDate] =
                 dailyBalances[formattedDate] ?? currentBalance;
         }
-        //  console.log("dailyBalance VAR from populateMissingBalances", dailyBalances)
+
         logger.info('Successfully populate missing balances.');
 
     } catch (error) {

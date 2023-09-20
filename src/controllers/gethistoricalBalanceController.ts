@@ -7,7 +7,6 @@ import logger from "../utils/logger";
 import { DateFormat } from "../utils/dateValidator";
 import { ValidationError } from "../utils/validationErrors";
 
-type HistoricalBalanceServiceType = (from: string, to: string) => Promise<HistoricalBalance[]>;
 
 export const getHistoricalBalance = async (req: Request, res: Response, next: NextFunction) => {
   logger.info(`Handling getHistoricalBalance request with query params: ${JSON.stringify(req.query)}`);
@@ -16,10 +15,9 @@ export const getHistoricalBalance = async (req: Request, res: Response, next: Ne
 
   if (typeof from !== "string" || typeof to !== "string" || (sort && typeof sort !== "string")) {
     logger.warn("Invalid query parameters received in getHistoricalBalance request");
-    res.status(400).json({ error: "Invalid query parameters" });
-    next(new ValidationError("Invalid query parameters"));
-    return;
+    return next(new ValidationError("Invalid query parameters"));
   }
+
 
   try {
     let historicalBalances: HistoricalBalance[] = await historicalBalanceService(from, to);

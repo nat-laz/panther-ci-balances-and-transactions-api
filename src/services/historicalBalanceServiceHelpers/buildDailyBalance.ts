@@ -33,10 +33,13 @@ export function buildDailyBalances(
 
         for (const transaction of transactions) {
             const transactionDate = validateAndParseDate(transaction.date, DateFormat.DATE_FORMAT_ISO);
+           
+            if (dailyBalances[formatDate(transactionDate)] === undefined) {
+                dailyBalances[formatDate(transactionDate)] = lastBalanceAmount;
+            }
 
             if (transaction.status !== STATUS_CANCELLED) {
                 lastBalanceAmount += transaction.amount;
-                dailyBalances[formatDate(transactionDate)] = lastBalanceAmount;
             }
         }
 

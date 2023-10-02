@@ -1,25 +1,26 @@
-import axios, { AxiosError } from "axios";
-import "dotenv/config";
+import fetch from "node-fetch";
 import logger from "../utils/logger";
-import { API_KEY, API_URL } from "./getBalances";
+import { API_KEY, API_URL, validateConfig } from '../utils/validateConfig';
+import { ValidationError } from "../utils/validationErrors";
 
 export async function getTransactions() {
 
-    try {
-        const response = await axios.get(`${API_URL}/transactions`, {
-          headers: { "x-api-key": API_KEY },
-        });
+  validateConfig(API_KEY, API_URL)
 
-        return response.data.transactions;
+  try {
+    const response = await fetch(`${API_URL}/transactions`, {
+      method: 'GET',
+      headers: { "x-api-key": API_KEY },
+    });
 
-    } catch (error) {
-        const axiosError = error as AxiosError;
-        logger.error(`Error while fetching balances: ${axiosError}`);
-
-        if (axiosError.response && axiosError.response.data) {
-          throw axiosError.response.data;
-        } else {
-          throw axiosError;
-        }
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new ValidationError(`Error while fetching transactions: ${errorData}`);
     }
+    const data = await response.json()
+    return data.transactions;
+  } catch (error) {
+    logger.error(`Error while fetching transactions: ${error}`);
+    throw error;
+  }
 }
